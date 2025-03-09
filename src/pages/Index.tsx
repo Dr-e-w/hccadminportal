@@ -8,17 +8,16 @@ import ResourceCard from "@/components/dashboard/ResourceCard";
 const Index = () => {
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h1 className="text-3xl font-light">Dashboard</h1>
         
-        <DashboardOverview />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <CalendarComponent />
-          <ProgressTracker />
+          <div className="flex flex-col gap-4">
+            <ProgressTracker />
+            <ResourceCard />
+          </div>
         </div>
-        
-        <ResourceCard />
       </div>
     </DashboardLayout>
   );

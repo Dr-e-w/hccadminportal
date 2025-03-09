@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,11 @@ type Event = {
 
 const CalendarComponent = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>([
+    { id: '1', title: 'Team Meeting', date: new Date(), description: 'Weekly sync' },
+    { id: '2', title: 'Project Deadline', date: new Date(new Date().setDate(new Date().getDate() + 2)), description: 'Final deliverables' },
+    { id: '3', title: 'Client Call', date: new Date(new Date().setDate(new Date().getDate() + 1)), description: 'Quarterly review' },
+  ]);
   const [selectedDay, setSelectedDay] = useState<Date | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -84,14 +87,14 @@ const CalendarComponent = () => {
   };
 
   return (
-    <Card className="glass-card animate-scale-in">
-      <CardHeader>
-        <CardTitle className="text-2xl font-light flex items-center justify-between">
+    <Card className="glass-card">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-xl font-light flex items-center justify-between">
           <span>Calendar</span>
           <Button 
             variant="outline" 
             size="sm" 
-            className="flex items-center gap-1 button-hover"
+            className="flex items-center gap-1"
             onClick={() => {
               if (selectedDay) {
                 setIsDialogOpen(true);
@@ -106,13 +109,13 @@ const CalendarComponent = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           <div className="md:col-span-7">
             <Calendar
               mode="single"
               selected={date}
               onSelect={handleDateSelect}
-              className="rounded-md border bg-white p-3 pointer-events-auto shadow-sm"
+              className="rounded-md border bg-white p-2 pointer-events-auto shadow-sm"
               modifiers={{
                 hasEvent: (date) => dateHasEvent(date),
               }}
@@ -122,8 +125,8 @@ const CalendarComponent = () => {
             />
           </div>
           <div className="md:col-span-5">
-            <div className="bg-white rounded-md border p-4 shadow-sm h-full">
-              <h3 className="font-medium mb-3">
+            <div className="bg-white rounded-md border p-3 shadow-sm max-h-[240px] overflow-auto">
+              <h3 className="font-medium mb-2 text-sm">
                 {selectedDay ? (
                   <span>{selectedDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
                 ) : (
@@ -134,18 +137,18 @@ const CalendarComponent = () => {
               {selectedDayEvents.length > 0 ? (
                 <div className="space-y-2">
                   {selectedDayEvents.map(event => (
-                    <div key={event.id} className="p-3 border rounded-md list-item-hover transition-all-200">
+                    <div key={event.id} className="p-2 border rounded-md list-item-hover transition-all-200">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-medium">{event.title}</h4>
+                          <h4 className="font-medium text-sm">{event.title}</h4>
                           {event.description && (
-                            <p className="text-sm text-gray-500 mt-1">{event.description}</p>
+                            <p className="text-xs text-gray-500">{event.description}</p>
                           )}
                         </div>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-xs text-gray-500 hover:text-destructive"
+                          className="text-xs text-gray-500 hover:text-destructive h-6 px-2"
                           onClick={() => handleRemoveEvent(event.id)}
                         >
                           Remove
@@ -155,9 +158,9 @@ const CalendarComponent = () => {
                   ))}
                 </div>
               ) : selectedDay ? (
-                <p className="text-gray-500 text-sm">No events scheduled</p>
+                <p className="text-gray-500 text-xs">No events scheduled</p>
               ) : (
-                <p className="text-gray-500 text-sm">Select a date to view events</p>
+                <p className="text-gray-500 text-xs">Select a date to view events</p>
               )}
             </div>
           </div>
@@ -168,9 +171,6 @@ const CalendarComponent = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Event</DialogTitle>
-            <DialogDescription>
-              {selectedDay && `Creating event for ${selectedDay.toLocaleDateString()}`}
-            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
