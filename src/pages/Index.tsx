@@ -1,13 +1,26 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import DashboardLayout from "@/components/DashboardLayout";
+import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import CalendarComponent from "@/components/dashboard/CalendarComponent";
+import ProgressTracker from "@/components/dashboard/ProgressTracker";
+import ResourceCard from "@/components/dashboard/ResourceCard";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-light">Dashboard</h1>
+        
+        <DashboardOverview />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <CalendarComponent />
+          <ProgressTracker />
+        </div>
+        
+        <ResourceCard />
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

@@ -1,11 +1,12 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 40% 98%;
+    --foreground: 210 40% 10%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -13,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 210 100% 60%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -32,22 +33,15 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-primary: 210 100% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -61,7 +55,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 210 100% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -97,5 +91,67 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md shadow-md border border-white/20;
+  }
+  
+  /* Transition classes */
+  .transition-all-200 {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .transition-all-300 {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .transition-transform-300 {
+    @apply transition-transform duration-300 ease-in-out;
+  }
+  
+  /* Button hover effect */
+  .button-hover {
+    @apply hover:translate-y-[-2px] hover:shadow-lg transition-all-200;
+  }
+  
+  /* Card hover effect */
+  .card-hover {
+    @apply hover:shadow-lg hover:translate-y-[-2px] transition-all-300;
+  }
+  
+  /* Calendar day styles */
+  .calendar-day {
+    @apply w-10 h-10 flex items-center justify-center rounded-full transition-all-200;
+  }
+  
+  .calendar-day-selected {
+    @apply bg-primary text-white;
+  }
+  
+  .calendar-day-today {
+    @apply border border-primary text-primary;
+  }
+  
+  .calendar-day-event {
+    @apply relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full;
+  }
+  
+  /* Progress bar */
+  .progress-bar {
+    @apply h-2 rounded-full bg-gray-200 overflow-hidden;
+  }
+  
+  .progress-value {
+    @apply h-full bg-primary transition-all duration-500 ease-out;
+  }
+  
+  /* List item hover */
+  .list-item-hover {
+    @apply hover:bg-gray-50 transition-all-200 rounded-md;
   }
 }
