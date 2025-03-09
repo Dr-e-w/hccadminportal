@@ -11,28 +11,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from 'lucide-react';
+import { Plus, Clock } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 type Event = {
   id: string;
   title: string;
   date: Date;
+  time?: string;
   description?: string;
 };
 
 const CalendarComponent = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<Event[]>([
-    { id: '1', title: 'Team Meeting', date: new Date(), description: 'Weekly sync' },
-    { id: '2', title: 'Project Deadline', date: new Date(new Date().setDate(new Date().getDate() + 2)), description: 'Final deliverables' },
-    { id: '3', title: 'Client Call', date: new Date(new Date().setDate(new Date().getDate() + 1)), description: 'Quarterly review' },
+    { id: '1', title: 'Team Meeting', date: new Date(), time: '09:00', description: 'Weekly sync' },
+    { id: '2', title: 'Project Deadline', date: new Date(new Date().setDate(new Date().getDate() + 2)), time: '15:00', description: 'Final deliverables' },
+    { id: '3', title: 'Client Call', date: new Date(new Date().setDate(new Date().getDate() + 1)), time: '11:30', description: 'Quarterly review' },
   ]);
   const [selectedDay, setSelectedDay] = useState<Date | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: '',
+    time: '',
     description: '',
   });
   const [selectedDayEvents, setSelectedDayEvents] = useState<Event[]>([]);
@@ -64,12 +67,13 @@ const CalendarComponent = () => {
     const event: Event = {
       id: Math.random().toString(36).substring(2, 9),
       title: newEvent.title,
+      time: newEvent.time,
       description: newEvent.description,
       date: selectedDay,
     };
     
     setEvents([...events, event]);
-    setNewEvent({ title: '', description: '' });
+    setNewEvent({ title: '', time: '', description: '' });
     setIsDialogOpen(false);
     
     toast.success('Event added successfully!');
@@ -88,7 +92,7 @@ const CalendarComponent = () => {
 
   return (
     <Card className="glass-card">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <CardTitle className="text-xl font-light flex items-center justify-between">
           <span>Calendar</span>
           <Button 
@@ -108,14 +112,14 @@ const CalendarComponent = () => {
           </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div className="md:col-span-7">
+      <CardContent className="p-0 lg:p-3">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+          <div className="md:col-span-6 p-3">
             <Calendar
               mode="single"
               selected={date}
               onSelect={handleDateSelect}
-              className="rounded-md border bg-white p-2 pointer-events-auto shadow-sm"
+              className="rounded-md border bg-white pointer-events-auto shadow-sm"
               modifiers={{
                 hasEvent: (date) => dateHasEvent(date),
               }}
@@ -124,44 +128,56 @@ const CalendarComponent = () => {
               }}
             />
           </div>
-          <div className="md:col-span-5">
-            <div className="bg-white rounded-md border p-3 shadow-sm max-h-[240px] overflow-auto">
-              <h3 className="font-medium mb-2 text-sm">
-                {selectedDay ? (
-                  <span>{selectedDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
-                ) : (
-                  <span>Select a date</span>
-                )}
-              </h3>
+          <div className="md:col-span-6 p-3">
+            <div className="bg-white rounded-md border shadow-sm h-full overflow-hidden flex flex-col">
+              <div className="p-3 border-b bg-gray-50">
+                <h3 className="font-medium">
+                  {selectedDay ? (
+                    <span>{format(selectedDay, 'EEEE, MMMM d, yyyy')}</span>
+                  ) : (
+                    <span>Select a date</span>
+                  )}
+                </h3>
+              </div>
               
-              {selectedDayEvents.length > 0 ? (
-                <div className="space-y-2">
-                  {selectedDayEvents.map(event => (
-                    <div key={event.id} className="p-2 border rounded-md list-item-hover transition-all-200">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium text-sm">{event.title}</h4>
-                          {event.description && (
-                            <p className="text-xs text-gray-500">{event.description}</p>
-                          )}
+              <div className="p-3 overflow-auto flex-1">
+                {selectedDayEvents.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedDayEvents.map(event => (
+                      <div key={event.id} className="p-2 border rounded-md list-item-hover transition-all-200">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">{event.title}</h4>
+                              {event.time && (
+                                <div className="flex items-center text-xs text-gray-500">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  {event.time}
+                                </div>
+                              )}
+                            </div>
+                            {event.description && (
+                              <p className="text-xs text-gray-500 mt-1">{event.description}</p>
+                            )}
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs text-gray-500 hover:text-destructive h-6 px-2"
+                            onClick={() => handleRemoveEvent(event.id)}
+                          >
+                            Remove
+                          </Button>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-xs text-gray-500 hover:text-destructive h-6 px-2"
-                          onClick={() => handleRemoveEvent(event.id)}
-                        >
-                          Remove
-                        </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : selectedDay ? (
-                <p className="text-gray-500 text-xs">No events scheduled</p>
-              ) : (
-                <p className="text-gray-500 text-xs">Select a date to view events</p>
-              )}
+                    ))}
+                  </div>
+                ) : selectedDay ? (
+                  <p className="text-gray-500 text-xs">No events scheduled</p>
+                ) : (
+                  <p className="text-gray-500 text-xs">Select a date to view events</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -180,6 +196,15 @@ const CalendarComponent = () => {
                 value={newEvent.title}
                 onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
                 placeholder="Enter event title"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="event-time">Time (Optional)</Label>
+              <Input
+                id="event-time"
+                type="time"
+                value={newEvent.time}
+                onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
               />
             </div>
             <div className="grid gap-2">
