@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import CalendarPage from "./pages/CalendarPage";
 import ProgressPage from "./pages/ProgressPage";
 import ResourcesPage from "./pages/ResourcesPage";
+import EmployeesPage from "./pages/EmployeesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/resources/employees" element={<EmployeesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
