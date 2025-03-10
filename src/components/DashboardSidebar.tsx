@@ -38,6 +38,11 @@ const DashboardSidebar = () => {
       title: "Resources",
       icon: FileText,
       path: "/resources",
+    },
+    {
+      title: "All Employees",
+      icon: Users,
+      path: "/resources/employees",
     }
   ];
 
