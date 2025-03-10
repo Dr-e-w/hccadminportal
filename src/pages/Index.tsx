@@ -2,7 +2,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import CalendarComponent from "@/components/dashboard/CalendarComponent";
-import ProgressTracker from "@/components/dashboard/ProgressTracker";
+import EmployeeProgressSummary from "@/components/dashboard/EmployeeProgressSummary";
 import ResourceCard from "@/components/dashboard/ResourceCard";
 
 const Index = () => {
@@ -14,7 +14,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <CalendarComponent />
           <div className="flex flex-col gap-4">
-            <ProgressTracker />
+            <EmployeeProgressSummary />
             <ResourceCard />
           </div>
         </div>
