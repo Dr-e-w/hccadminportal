@@ -16,15 +16,15 @@ type SubTask = {
 type Employee = {
   id: string;
   name: string;
-  business: string;
+  department: "Fletcher" | "Culinary";
   progress: number;
-  type: '90-day' | 'graduation';
+  type: '90-day' | 'graduation' | 'before-kitchen-use';
   task: string;
   subtasks: SubTask[];
 };
 
 interface EmployeeProgressProps {
-  programType: '90-day' | 'graduation';
+  programType: '90-day' | 'graduation' | 'before-kitchen-use';
 }
 
 const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
@@ -35,7 +35,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     { 
       id: '1', 
       name: 'Alex Johnson', 
-      business: 'Sales Department', 
+      department: 'Fletcher', 
       progress: 75, 
       type: '90-day', 
       task: 'Q1 Analytics Report',
@@ -51,7 +51,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     { 
       id: '2', 
       name: 'Sarah Miller', 
-      business: 'Marketing', 
+      department: 'Fletcher', 
       progress: 45, 
       type: '90-day', 
       task: 'Client Presentations',
@@ -67,23 +67,23 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     { 
       id: '3', 
       name: 'Michael Chen', 
-      business: 'Design Team', 
+      department: 'Culinary', 
       progress: 90, 
       type: '90-day', 
-      task: 'Website Redesign',
+      task: 'Recipe Development',
       subtasks: [
-        { id: 's13', name: 'Analyze current website', completed: true },
-        { id: 's14', name: 'Conduct user research', completed: true },
-        { id: 's15', name: 'Create wireframes', completed: true },
-        { id: 's16', name: 'Design mockups', completed: true },
-        { id: 's17', name: 'User testing', completed: true },
-        { id: 's18', name: 'Implement feedback', completed: false },
+        { id: 's13', name: 'Research trends', completed: true },
+        { id: 's14', name: 'Source ingredients', completed: true },
+        { id: 's15', name: 'Create recipe drafts', completed: true },
+        { id: 's16', name: 'Test recipes', completed: true },
+        { id: 's17', name: 'Gather feedback', completed: true },
+        { id: 's18', name: 'Finalize recipes', completed: false },
       ]
     },
     { 
       id: '4', 
       name: 'Emily Parker', 
-      business: 'Research Division', 
+      department: 'Fletcher', 
       progress: 82, 
       type: 'graduation', 
       task: 'Market Research',
@@ -97,29 +97,57 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     { 
       id: '5', 
       name: 'David Thompson', 
-      business: 'Finance', 
+      department: 'Culinary', 
       progress: 38, 
       type: 'graduation', 
-      task: 'Financial Analysis',
+      task: 'Menu Planning',
       subtasks: [
-        { id: 's23', name: 'Compile financial data', completed: true },
-        { id: 's24', name: 'Create financial models', completed: false },
-        { id: 's25', name: 'Generate projections', completed: false },
-        { id: 's26', name: 'Prepare final report', completed: false },
+        { id: 's23', name: 'Seasonal menu research', completed: true },
+        { id: 's24', name: 'Create menu drafts', completed: false },
+        { id: 's25', name: 'Cost analysis', completed: false },
+        { id: 's26', name: 'Finalize menu items', completed: false },
       ]
     },
     { 
       id: '6', 
       name: 'Jessica Lee', 
-      business: 'Product Development', 
+      department: 'Culinary', 
       progress: 95, 
       type: 'graduation', 
-      task: 'Product Design',
+      task: 'Kitchen Management',
       subtasks: [
-        { id: 's27', name: 'Market analysis', completed: true },
-        { id: 's28', name: 'Feature prioritization', completed: true },
-        { id: 's29', name: 'Product specifications', completed: true },
-        { id: 's30', name: 'Final presentation', completed: true },
+        { id: 's27', name: 'Inventory procedures', completed: true },
+        { id: 's28', name: 'Staff scheduling', completed: true },
+        { id: 's29', name: 'Quality control processes', completed: true },
+        { id: 's30', name: 'Efficiency improvements', completed: true },
+      ]
+    },
+    { 
+      id: '7', 
+      name: 'Robert Wilson', 
+      department: 'Culinary', 
+      progress: 60, 
+      type: 'before-kitchen-use', 
+      task: 'Safety Training',
+      subtasks: [
+        { id: 's31', name: 'Food safety certificate', completed: true },
+        { id: 's32', name: 'Kitchen equipment training', completed: true },
+        { id: 's33', name: 'Sanitation procedures', completed: false },
+        { id: 's34', name: 'Emergency protocols', completed: false },
+      ]
+    },
+    { 
+      id: '8', 
+      name: 'Maria Rodriguez', 
+      department: 'Culinary', 
+      progress: 80, 
+      type: 'before-kitchen-use', 
+      task: 'Basic Techniques',
+      subtasks: [
+        { id: 's35', name: 'Knife skills assessment', completed: true },
+        { id: 's36', name: 'Basic cooking methods', completed: true },
+        { id: 's37', name: 'Food presentation', completed: true },
+        { id: 's38', name: 'Kitchen terminology', completed: false },
       ]
     },
   ];
@@ -157,7 +185,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                     </div>
                     <div>
                       <h3 className="font-medium text-lg">{employee.name}</h3>
-                      <p className="text-sm text-gray-500">{employee.business}</p>
+                      <p className="text-sm text-gray-500">{employee.department}</p>
                     </div>
                   </div>
                   
@@ -211,7 +239,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
             <DialogTitle className="text-xl">
               {selectedEmployee?.name}'s Subtasks
               <span className="ml-2 text-sm font-normal text-gray-500 capitalize">
-                ({selectedEmployee?.type} program)
+                ({selectedEmployee?.type.replace(/-/g, ' ')} program)
               </span>
             </DialogTitle>
           </DialogHeader>

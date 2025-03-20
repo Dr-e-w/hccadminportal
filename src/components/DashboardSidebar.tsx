@@ -1,5 +1,5 @@
 
-import { Calendar, Users, FileText, Home } from 'lucide-react';
+import { Calendar, Users, FileText, Home, Receipt } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sidebar,
