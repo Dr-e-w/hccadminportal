@@ -222,7 +222,6 @@ const RentTracker = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <Select 
-              defaultValue={currentMonth}
               value={selectedMonth}
               onValueChange={setSelectedMonth}
             >
