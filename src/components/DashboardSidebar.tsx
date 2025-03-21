@@ -1,5 +1,5 @@
 
-import { Calendar, Users, FileText, Home, Receipt } from 'lucide-react';
+import { Calendar, Users, FileText, Home, DollarSign } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -33,6 +33,11 @@ const DashboardSidebar = () => {
       title: "Employee Progress",
       icon: Users,
       path: "/employees",
+    },
+    {
+      title: "Rent Tracker",
+      icon: DollarSign,
+      path: "/rent-tracker",
     },
     {
       title: "Resources",
