@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { User, CheckCircle, Circle, Receipt, Calendar, History, Clock, DollarSign } from "lucide-react";
+import { User, CheckCircle, Circle, Receipt, Calendar, History, Clock, DollarSign, PiggyBank } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -20,6 +20,7 @@ type Member = {
   department: "Fletcher" | "Culinary";
   rentAmount: number;
   kitchenHours?: number;
+  totalRentPaid: number;
   paymentHistory: {
     month: string;
     paid: boolean;
@@ -66,6 +67,7 @@ const RentTracker = () => {
       name: 'Alex Johnson', 
       department: 'Fletcher', 
       rentAmount: 650,
+      totalRentPaid: 1950,
       paymentHistory: [
         { month: currentMonth, paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth(), 5), "PP"), amountPaid: 650 },
         { month: months[1], paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 4), "PP"), amountPaid: 650 },
@@ -77,6 +79,7 @@ const RentTracker = () => {
       name: 'Sarah Miller', 
       department: 'Fletcher', 
       rentAmount: 725,
+      totalRentPaid: 725,
       paymentHistory: [
         { month: currentMonth, paid: false },
         { month: months[1], paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 10), "PP"), amountPaid: 725 },
@@ -89,6 +92,7 @@ const RentTracker = () => {
       department: 'Culinary', 
       rentAmount: 550,
       kitchenHours: 20,
+      totalRentPaid: 1350,
       paymentHistory: [
         { month: currentMonth, paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1), "PP"), amountPaid: 450, kitchenHours: 20 },
         { month: months[1], paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 2), "PP"), amountPaid: 450, kitchenHours: 20 },
@@ -100,6 +104,7 @@ const RentTracker = () => {
       name: 'Emily Parker', 
       department: 'Fletcher', 
       rentAmount: 675,
+      totalRentPaid: 1350,
       paymentHistory: [
         { month: currentMonth, paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth(), 3), "PP"), amountPaid: 675 },
         { month: months[1], paid: false },
@@ -112,6 +117,7 @@ const RentTracker = () => {
       department: 'Culinary', 
       rentAmount: 600,
       kitchenHours: 15,
+      totalRentPaid: 525,
       paymentHistory: [
         { month: currentMonth, paid: false },
         { month: months[1], paid: false },
@@ -124,6 +130,7 @@ const RentTracker = () => {
       department: 'Culinary', 
       rentAmount: 575,
       kitchenHours: 10,
+      totalRentPaid: 525,
       paymentHistory: [
         { month: currentMonth, paid: false },
         { month: months[1], paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 8), "PP"), amountPaid: 525, kitchenHours: 10 },
@@ -136,6 +143,7 @@ const RentTracker = () => {
       department: 'Culinary', 
       rentAmount: 625,
       kitchenHours: 8,
+      totalRentPaid: 1170,
       paymentHistory: [
         { month: currentMonth, paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth(), 2), "PP"), amountPaid: 585, kitchenHours: 8 },
         { month: months[1], paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 1), "PP"), amountPaid: 585, kitchenHours: 8 },
@@ -148,6 +156,7 @@ const RentTracker = () => {
       department: 'Culinary', 
       rentAmount: 590,
       kitchenHours: 12,
+      totalRentPaid: 1590,
       paymentHistory: [
         { month: currentMonth, paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth(), 4), "PP"), amountPaid: 530, kitchenHours: 12 },
         { month: months[1], paid: true, paidOn: format(new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 5), "PP"), amountPaid: 530, kitchenHours: 12 },
@@ -163,11 +172,13 @@ const RentTracker = () => {
           const updatedHistory = member.paymentHistory.map(record => {
             if (record.month === month) {
               const isPaid = !record.paid;
+              const amountPaid = isPaid ? calculateEffectiveRent(member) : undefined;
+              
               const updated = { 
                 ...record, 
                 paid: isPaid,
                 paidOn: isPaid ? format(new Date(), "PP") : undefined,
-                amountPaid: isPaid ? calculateEffectiveRent(member) : undefined,
+                amountPaid,
                 kitchenHours: isPaid && member.department === "Culinary" ? member.kitchenHours : undefined
               };
               
@@ -178,6 +189,23 @@ const RentTracker = () => {
                   : `${member.name}'s rent for ${month} has been marked as unpaid`
               );
               
+              // Update total rent paid
+              let newTotalPaid = member.totalRentPaid;
+              if (isPaid && amountPaid) {
+                newTotalPaid += amountPaid;
+              } else if (!isPaid && record.amountPaid) {
+                newTotalPaid -= record.amountPaid;
+              }
+              
+              // Update member's total rent paid
+              setTimeout(() => {
+                setMembers(prev => 
+                  prev.map(m => 
+                    m.id === member.id ? { ...m, totalRentPaid: newTotalPaid } : m
+                  )
+                );
+              }, 0);
+              
               return updated;
             }
             return record;
@@ -186,13 +214,27 @@ const RentTracker = () => {
           // If the month doesn't exist in history, add it
           if (!member.paymentHistory.some(record => record.month === month)) {
             const isPaid = true;
+            const amountPaid = calculateEffectiveRent(member);
+            
             updatedHistory.push({
               month,
               paid: isPaid,
               paidOn: format(new Date(), "PP"),
-              amountPaid: calculateEffectiveRent(member),
+              amountPaid,
               kitchenHours: member.department === "Culinary" ? member.kitchenHours : undefined
             });
+            
+            // Update total rent paid
+            const newTotalPaid = member.totalRentPaid + amountPaid;
+            
+            // Update member's total rent paid
+            setTimeout(() => {
+              setMembers(prev => 
+                prev.map(m => 
+                  m.id === member.id ? { ...m, totalRentPaid: newTotalPaid } : m
+                )
+              );
+            }, 0);
             
             toast(`${member.name}'s rent for ${month} has been marked as paid`);
           }
@@ -437,27 +479,30 @@ const RentTracker = () => {
                     </div>
                     
                     <div className="mt-2 grid grid-cols-2 gap-2">
+                      {/* Total Rent Paid (NEW) */}
+                      <div className="flex items-center justify-between bg-white p-2 rounded-md col-span-2 border-l-4 border-blue-500">
+                        <div className="flex items-center gap-1">
+                          <PiggyBank className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium">Total Rent Paid:</span>
+                        </div>
+                        <span className="font-medium text-blue-600">${member.totalRentPaid}</span>
+                      </div>
+                      
+                      {/* Monthly Rent Amount */}
                       <div className="flex items-center justify-between bg-white p-2 rounded-md">
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-4 w-4 text-green-600" />
-                          <span className="text-sm">Rent Amount:</span>
+                          <span className="text-sm">Monthly Rent:</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="font-medium">${member.rentAmount}</span>
                           <Button 
                             variant="ghost" 
-                            size="icon" 
-                            className="h-5 w-5 rounded-full"
+                            size="sm" 
+                            className="text-xs h-6 px-2 text-blue-500"
                             onClick={() => openRentAmountDialog(member.id)}
                           >
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <span className="text-xs text-blue-500">Edit</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Edit rent amount</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            Edit
                           </Button>
                         </div>
                       </div>
@@ -472,18 +517,11 @@ const RentTracker = () => {
                             <span className="font-medium">{member.kitchenHours || 0}h</span>
                             <Button 
                               variant="ghost" 
-                              size="icon" 
-                              className="h-5 w-5 rounded-full"
+                              size="sm" 
+                              className="text-xs h-6 px-2 text-blue-500"
                               onClick={() => openKitchenHoursDialog(member.id)}
                             >
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <span className="text-xs text-blue-500">Edit</span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Edit kitchen hours</p>
-                                </TooltipContent>
-                              </Tooltip>
+                              Edit
                             </Button>
                           </div>
                         </div>
@@ -520,7 +558,8 @@ const RentTracker = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Department</TableHead>
-                    <TableHead>Rent</TableHead>
+                    <TableHead>Monthly Rent</TableHead>
+                    <TableHead>Total Paid</TableHead>
                     {months.slice(0, 6).map(month => (
                       <TableHead key={month} className="text-center">
                         {month.split(' ')[0]}
@@ -538,11 +577,11 @@ const RentTracker = () => {
                           <span>${member.rentAmount}</span>
                           <Button 
                             variant="ghost" 
-                            size="icon" 
-                            className="h-5 w-5 rounded-full"
+                            size="sm" 
+                            className="text-xs h-6 px-2 text-blue-500"
                             onClick={() => openRentAmountDialog(member.id)}
                           >
-                            <span className="text-xs text-blue-500">Edit</span>
+                            Edit
                           </Button>
                         </div>
                         {member.department === "Culinary" && (
@@ -550,15 +589,18 @@ const RentTracker = () => {
                             <Clock className="h-3 w-3" /> 
                             <span>{member.kitchenHours || 0}h</span>
                             <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-4 w-4 rounded-full"
+                              variant="ghost"
+                              size="sm" 
+                              className="text-xs h-5 px-1 text-blue-500"
                               onClick={() => openKitchenHoursDialog(member.id)}
                             >
-                              <span className="text-xs text-blue-500">Edit</span>
+                              Edit
                             </Button>
                           </div>
                         )}
+                      </TableCell>
+                      <TableCell className="font-medium text-blue-600">
+                        ${member.totalRentPaid}
                       </TableCell>
                       
                       {months.slice(0, 6).map(month => {
@@ -607,40 +649,40 @@ const RentTracker = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Dialog for editing rent amount */}
+      {/* Dialog for editing rent amount - Simplified UI */}
       <Dialog open={editingAmount.isOpen} onOpenChange={(open) => !open && closeRentAmountDialog()}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Edit Rent Amount</DialogTitle>
+            <DialogTitle>Edit Monthly Rent</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="rent-amount">Monthly Rent Amount ($)</Label>
+          <div className="py-4">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <Input
                 id="rent-amount"
                 type="number"
                 min="0"
                 value={newRentAmount}
                 onChange={(e) => setNewRentAmount(e.target.value)}
+                className="pl-7"
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeRentAmountDialog}>Cancel</Button>
-            <Button onClick={handleUpdateRentAmount}>Save Changes</Button>
+            <Button onClick={handleUpdateRentAmount}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for editing kitchen hours */}
+      {/* Dialog for editing kitchen hours - Simplified UI */}
       <Dialog open={editingHours.isOpen} onOpenChange={(open) => !open && closeKitchenHoursDialog()}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle>Edit Kitchen Hours</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="kitchen-hours">Monthly Kitchen Hours</Label>
+          <div className="py-4">
+            <div className="relative">
               <Input
                 id="kitchen-hours"
                 type="number"
@@ -648,12 +690,12 @@ const RentTracker = () => {
                 value={newKitchenHours}
                 onChange={(e) => setNewKitchenHours(e.target.value)}
               />
-              <p className="text-sm text-gray-500">Each kitchen hour reduces rent by $5</p>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">hours</span>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeKitchenHoursDialog}>Cancel</Button>
-            <Button onClick={handleUpdateKitchenHours}>Save Changes</Button>
+            <Button onClick={handleUpdateKitchenHours}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
