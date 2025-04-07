@@ -9,6 +9,7 @@ import CalendarPage from "./pages/CalendarPage";
 import EmployeeProgressPage from "./pages/EmployeeProgressPage";
 import RentTrackerPage from "./pages/RentTrackerPage";
 import ResourcesPage from "./pages/ResourcesPage";
+import EventTrackingPage from "./pages/EventTrackingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/employees" element={<EmployeeProgressPage />} />
           <Route path="/rent-tracker" element={<RentTrackerPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/event-tracking" element={<EventTrackingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
