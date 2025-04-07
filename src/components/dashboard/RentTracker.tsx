@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -172,7 +171,7 @@ const RentTracker = () => {
           const updatedHistory = member.paymentHistory.map(record => {
             if (record.month === month) {
               const isPaid = !record.paid;
-              const amountPaid = isPaid ? calculateEffectiveRent(member) : undefined;
+              const amountPaid = calculateEffectiveRent(member);
               
               const updated = { 
                 ...record, 
@@ -251,9 +250,9 @@ const RentTracker = () => {
       return member.rentAmount;
     }
     
-    // Simple calculation: reduce $5 per kitchen hour (just for demonstration)
-    const discount = member.kitchenHours * 5;
-    return Math.max(member.rentAmount - discount, 0);
+    // Calculate: add $5 per kitchen hour (changed from reducing to increasing)
+    const additional = member.kitchenHours * 5;
+    return member.rentAmount + additional;
   };
 
   const handleUpdateRentAmount = () => {
@@ -290,7 +289,7 @@ const RentTracker = () => {
     setMembers(prev => 
       prev.map(member => {
         if (member.id === editingHours.memberId) {
-          toast.success(`Updated ${member.name}'s kitchen hours to ${hours} hours`);
+          toast.success(`Updated ${member.name}'s additional kitchen hours to ${hours} hours`);
           
           // Also update current month payment if already paid
           const updatedHistory = member.paymentHistory.map(record => {
@@ -298,7 +297,7 @@ const RentTracker = () => {
               return {
                 ...record,
                 kitchenHours: hours,
-                amountPaid: member.rentAmount - (hours * 5) // Update the amount paid based on new hours
+                amountPaid: member.rentAmount + (hours * 5) // Update the amount paid based on new hours
               };
             }
             return record;
@@ -343,7 +342,6 @@ const RentTracker = () => {
     setNewKitchenHours("");
   };
 
-  // Filter members based on selected month
   const getMembersForMonth = () => {
     return members.map(member => {
       // Find payment record for selected month
@@ -367,20 +365,20 @@ const RentTracker = () => {
   const unpaidCount = filteredMembers.length - paidCount;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Tabs 
         defaultValue="current"
         value={activeTab}
         onValueChange={(value) => setActiveTab(value as "current" | "history")}
         className="w-full"
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <Receipt className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-medium">Monthly Rent Status</h2>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <TabsList>
               <TabsTrigger value="current" className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -394,7 +392,7 @@ const RentTracker = () => {
           </div>
         </div>
         
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <Select 
               value={selectedMonth}
@@ -411,7 +409,7 @@ const RentTracker = () => {
             </Select>
           </div>
           
-          <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
               <span>Paid: {paidCount}</span>
@@ -424,15 +422,15 @@ const RentTracker = () => {
         </div>
 
         <TabsContent value="current" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMembers.map(member => (
               <Card key={member.id} className={cn(
-                "border hover:shadow-md transition-all duration-200",
-                member.rentPaid ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+                "border transition-all duration-200",
+                member.rentPaid ? "border-l-4 border-l-green-500" : "border-l-4 border-l-red-500"
               )}>
-                <CardContent className="p-4">
+                <CardContent className="p-5">
                   <div className="flex flex-col">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "h-10 w-10 rounded-full flex items-center justify-center",
@@ -446,7 +444,7 @@ const RentTracker = () => {
                         <div>
                           <h3 className="font-medium">{member.name}</h3>
                           <div className="flex items-center gap-2">
-                            <p className="text-sm text-gray-500">{member.department}</p>
+                            <p className="text-xs text-gray-500">{member.department}</p>
                             {member.rentPaid && member.paidOn && (
                               <p className="text-xs text-green-600">Paid on {member.paidOn}</p>
                             )}
@@ -478,63 +476,77 @@ const RentTracker = () => {
                       </Tooltip>
                     </div>
                     
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      {/* Total Rent Paid (NEW) */}
-                      <div className="flex items-center justify-between bg-white p-2 rounded-md col-span-2 border-l-4 border-blue-500">
-                        <div className="flex items-center gap-1">
-                          <PiggyBank className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium">Total Rent Paid:</span>
+                    <div className="space-y-3">
+                      {/* Total Rent Paid */}
+                      <div className="bg-blue-50 p-3 rounded-md border-l-4 border-blue-500">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <PiggyBank className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-medium">Total Paid:</span>
+                          </div>
+                          <span className="font-medium text-blue-600">${member.totalRentPaid}</span>
                         </div>
-                        <span className="font-medium text-blue-600">${member.totalRentPaid}</span>
                       </div>
                       
                       {/* Monthly Rent Amount */}
-                      <div className="flex items-center justify-between bg-white p-2 rounded-md">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4 text-green-600" />
-                          <span className="text-sm">Monthly Rent:</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium">${member.rentAmount}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-xs h-6 px-2 text-blue-500"
-                            onClick={() => openRentAmountDialog(member.id)}
-                          >
-                            Edit
-                          </Button>
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <DollarSign className="h-4 w-4 text-gray-600" />
+                            <span className="text-sm">Monthly Rent:</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium">${member.rentAmount}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 w-6 p-0 text-blue-500"
+                              onClick={() => openRentAmountDialog(member.id)}
+                            >
+                              <span className="sr-only">Edit</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                              </svg>
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       
                       {member.department === "Culinary" && (
-                        <div className="flex items-center justify-between bg-white p-2 rounded-md">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4 text-orange-500" />
-                            <span className="text-sm">Kitchen Hours:</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">{member.kitchenHours || 0}h</span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-xs h-6 px-2 text-blue-500"
-                              onClick={() => openKitchenHoursDialog(member.id)}
-                            >
-                              Edit
-                            </Button>
+                        <div className="bg-amber-50 p-3 rounded-md">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="h-4 w-4 text-amber-600" />
+                              <span className="text-sm">Additional Kitchen Hours:</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-medium">{member.kitchenHours || 0}h</span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 w-6 p-0 text-blue-500"
+                                onClick={() => openKitchenHoursDialog(member.id)}
+                              >
+                                <span className="sr-only">Edit</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                  <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                  <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                                </svg>
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
                       
                       {member.rentPaid && (
                         <div className={cn(
-                          "flex items-center justify-between p-2 rounded-md col-span-2",
-                          member.department === "Culinary" ? "bg-orange-50" : "bg-blue-50"
+                          "p-3 rounded-md",
+                          member.department === "Culinary" ? "bg-green-50 text-green-700" : "bg-green-50 text-green-700"
                         )}>
                           <span className="text-sm font-medium">
                             {member.department === "Culinary" 
-                              ? `Paid $${member.amountPaid} (with ${member.monthlyKitchenHours} kitchen hours)` 
+                              ? `Paid $${member.amountPaid} (with ${member.monthlyKitchenHours || 0} additional hours)` 
                               : `Paid $${member.amountPaid}`}
                           </span>
                         </div>
@@ -549,101 +561,111 @@ const RentTracker = () => {
         
         <TabsContent value="history" className="mt-0">
           <Card>
-            <CardHeader>
-              <CardTitle>Rent Payment History</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xl">Payment History</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Monthly Rent</TableHead>
-                    <TableHead>Total Paid</TableHead>
-                    {months.slice(0, 6).map(month => (
-                      <TableHead key={month} className="text-center">
-                        {month.split(' ')[0]}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {members.map(member => (
-                    <TableRow key={member.id}>
-                      <TableCell className="font-medium">{member.name}</TableCell>
-                      <TableCell>{member.department}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <span>${member.rentAmount}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-xs h-6 px-2 text-blue-500"
-                            onClick={() => openRentAmountDialog(member.id)}
-                          >
-                            Edit
-                          </Button>
-                        </div>
-                        {member.department === "Culinary" && (
-                          <div className="text-xs text-gray-500 flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> 
-                            <span>{member.kitchenHours || 0}h</span>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Monthly Rent</TableHead>
+                      <TableHead>Total Paid</TableHead>
+                      {months.slice(0, 6).map(month => (
+                        <TableHead key={month} className="text-center">
+                          {month.split(' ')[0]}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {members.map(member => (
+                      <TableRow key={member.id}>
+                        <TableCell className="font-medium">{member.name}</TableCell>
+                        <TableCell>{member.department}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <span>${member.rentAmount}</span>
                             <Button 
-                              variant="ghost"
+                              variant="ghost" 
                               size="sm" 
-                              className="text-xs h-5 px-1 text-blue-500"
-                              onClick={() => openKitchenHoursDialog(member.id)}
+                              className="h-6 w-6 p-0 text-blue-500"
+                              onClick={() => openRentAmountDialog(member.id)}
                             >
-                              Edit
+                              <span className="sr-only">Edit</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                              </svg>
                             </Button>
                           </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium text-blue-600">
-                        ${member.totalRentPaid}
-                      </TableCell>
-                      
-                      {months.slice(0, 6).map(month => {
-                        const paymentRecord = member.paymentHistory.find(record => record.month === month);
-                        return (
-                          <TableCell key={month} className="text-center">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost"
-                                  size="icon"
-                                  className={cn(
-                                    "h-8 w-8", 
-                                    paymentRecord?.paid 
-                                      ? "text-green-600 hover:text-green-700 hover:bg-green-100" 
-                                      : "text-red-600 hover:text-red-700 hover:bg-red-100"
-                                  )}
-                                  onClick={() => toggleRentStatus(member.id, month)}
-                                >
-                                  {paymentRecord?.paid ? (
-                                    <CheckCircle className="h-4 w-4" />
-                                  ) : (
-                                    <Circle className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {paymentRecord?.paid 
-                                  ? `Paid $${paymentRecord.amountPaid} on ${paymentRecord.paidOn}${
-                                      paymentRecord.kitchenHours 
-                                        ? ` (with ${paymentRecord.kitchenHours}h kitchen time)` 
-                                        : ''
-                                    }` 
-                                  : "Not paid"}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          {member.department === "Culinary" && (
+                            <div className="text-xs text-gray-500 flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> 
+                              <span>{member.kitchenHours || 0}h additional</span>
+                              <Button 
+                                variant="ghost"
+                                size="sm" 
+                                className="h-5 w-5 p-0 text-blue-500"
+                                onClick={() => openKitchenHoursDialog(member.id)}
+                              >
+                                <span className="sr-only">Edit</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                                  <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                  <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                                </svg>
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium text-blue-600">
+                          ${member.totalRentPaid}
+                        </TableCell>
+                        
+                        {months.slice(0, 6).map(month => {
+                          const paymentRecord = member.paymentHistory.find(record => record.month === month);
+                          return (
+                            <TableCell key={month} className="text-center">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn(
+                                      "h-8 w-8", 
+                                      paymentRecord?.paid 
+                                        ? "text-green-600 hover:text-green-700 hover:bg-green-100" 
+                                        : "text-red-600 hover:text-red-700 hover:bg-red-100"
+                                    )}
+                                    onClick={() => toggleRentStatus(member.id, month)}
+                                  >
+                                    {paymentRecord?.paid ? (
+                                      <CheckCircle className="h-4 w-4" />
+                                    ) : (
+                                      <Circle className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {paymentRecord?.paid 
+                                    ? `Paid $${paymentRecord.amountPaid} on ${paymentRecord.paidOn}${
+                                        paymentRecord.kitchenHours 
+                                          ? ` (with ${paymentRecord.kitchenHours}h additional kitchen time)` 
+                                          : ''
+                                      }` 
+                                    : "Not paid"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -651,9 +673,9 @@ const RentTracker = () => {
 
       {/* Dialog for editing rent amount - Simplified UI */}
       <Dialog open={editingAmount.isOpen} onOpenChange={(open) => !open && closeRentAmountDialog()}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[350px]">
           <DialogHeader>
-            <DialogTitle>Edit Monthly Rent</DialogTitle>
+            <DialogTitle>Update Monthly Rent</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <div className="relative">
@@ -677,9 +699,9 @@ const RentTracker = () => {
 
       {/* Dialog for editing kitchen hours - Simplified UI */}
       <Dialog open={editingHours.isOpen} onOpenChange={(open) => !open && closeKitchenHoursDialog()}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[350px]">
           <DialogHeader>
-            <DialogTitle>Edit Kitchen Hours</DialogTitle>
+            <DialogTitle>Additional Kitchen Hours</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <div className="relative">
@@ -692,6 +714,9 @@ const RentTracker = () => {
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">hours</span>
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Additional hours will increase the monthly rent.
+            </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeKitchenHoursDialog}>Cancel</Button>
