@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { PlusCircle } from "lucide-react";
 import EventDialog from "./EventDialog";
 
@@ -31,8 +32,11 @@ const initialEvents = {
     { id: "3", memberName: "Alice Johnson", date: "2025-03-22", notes: "Solo recital" },
   ],
   educationHours: [
-    { id: "1", memberName: "Alice Johnson", date: "2025-04-05", notes: "Music theory class" },
-    { id: "2", memberName: "Bob Brown", date: "2025-04-06", notes: "Workshop attendance" },
+    { id: "1", memberName: "Alice Johnson", date: "2025-04-05", notes: "Music theory class", hours: 4 },
+    { id: "2", memberName: "Bob Brown", date: "2025-04-06", notes: "Workshop attendance", hours: 6 },
+    { id: "3", memberName: "Alice Johnson", date: "2025-04-10", notes: "Composition workshop", hours: 3 },
+    { id: "4", memberName: "John Doe", date: "2025-04-11", notes: "History of music lecture", hours: 2 },
+    { id: "5", memberName: "Jane Smith", date: "2025-04-12", notes: "Practical session", hours: 5 },
   ],
 };
 
@@ -43,6 +47,7 @@ interface Event {
   memberName: string;
   date: string;
   notes: string;
+  hours?: number;
 }
 
 const EventTracker = () => {
@@ -65,6 +70,17 @@ const EventTracker = () => {
     chamberEvents: "Chamber Events",
     educationHours: "Education Hours",
   };
+
+  // Calculate total hours per member for education hours
+  const educationHoursByMember = events.educationHours.reduce((acc, event) => {
+    if (!event.hours) return acc;
+    
+    if (!acc[event.memberName]) {
+      acc[event.memberName] = 0;
+    }
+    acc[event.memberName] += event.hours;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="space-y-6">
@@ -95,12 +111,29 @@ const EventTracker = () => {
                 <CardTitle>{tabLabels[type as EventType]} Attendance</CardTitle>
               </CardHeader>
               <CardContent>
+                {type === "educationHours" && Object.keys(educationHoursByMember).length > 0 && (
+                  <div className="mb-6 space-y-4">
+                    <h3 className="text-lg font-medium">Education Hours Progress (40 hours required)</h3>
+                    <div className="grid gap-4">
+                      {Object.entries(educationHoursByMember).map(([memberName, hours]) => (
+                        <div key={memberName} className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{memberName}</span>
+                            <span className="text-sm text-muted-foreground">{hours} / 40 hours</span>
+                          </div>
+                          <Progress value={(hours / 40) * 100} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Member Name</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Notes</TableHead>
+                      <TableHead>{type === "educationHours" ? "Hours" : "Notes"}</TableHead>
+                      {type === "educationHours" && <TableHead>Notes</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -109,12 +142,13 @@ const EventTracker = () => {
                         <TableRow key={event.id}>
                           <TableCell className="font-medium">{event.memberName}</TableCell>
                           <TableCell>{event.date}</TableCell>
-                          <TableCell>{event.notes}</TableCell>
+                          <TableCell>{type === "educationHours" ? event.hours : event.notes}</TableCell>
+                          {type === "educationHours" && <TableCell>{event.notes}</TableCell>}
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center py-6 text-muted-foreground">
+                        <TableCell colSpan={type === "educationHours" ? 4 : 3} className="text-center py-6 text-muted-foreground">
                           No events recorded yet
                         </TableCell>
                       </TableRow>
