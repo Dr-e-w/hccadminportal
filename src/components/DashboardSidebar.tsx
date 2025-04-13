@@ -32,7 +32,7 @@ const DashboardSidebar = () => {
     {
       title: "Member Progress",
       icon: Users,
-      path: "/members",
+      path: "/employees",
     },
     {
       title: "Rent Tracker",
