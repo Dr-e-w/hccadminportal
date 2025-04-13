@@ -18,7 +18,7 @@ type SubTask = {
   completed: boolean;
 };
 
-type Employee = {
+type Member = {
   id: string;
   name: string;
   department: "Fletcher" | "Culinary";
@@ -28,7 +28,7 @@ type Employee = {
   subtasks: SubTask[];
 };
 
-interface EmployeeProgressProps {
+interface MemberProgressProps {
   programType: '90-day' | 'graduation' | 'before-kitchen-use';
 }
 
@@ -37,8 +37,8 @@ type TaskFormValues = {
   description?: string;
 };
 
-const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+const MemberProgress = ({ programType }: MemberProgressProps) => {
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
   const [editTaskIndex, setEditTaskIndex] = useState<number | null>(null);
@@ -53,7 +53,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     },
   });
 
-  const [employees, setEmployees] = useState<Employee[]>([
+  const [members, setMembers] = useState<Member[]>([
     { 
       id: '1', 
       name: 'Alex Johnson', 
@@ -174,7 +174,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     },
   ]);
 
-  const filteredEmployees = employees.filter(emp => emp.type === programType);
+  const filteredMembers = members.filter(mem => mem.type === programType);
 
   const getProgressColor = (progress: number) => {
     if (progress >= 80) return "bg-green-100 text-green-800";
@@ -188,17 +188,17 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     return "bg-primary";
   };
 
-  const openSubtasksDialog = (employee: Employee) => {
-    setSelectedEmployee(employee);
+  const openSubtasksDialog = (member: Member) => {
+    setSelectedMember(member);
     setDialogOpen(true);
   };
 
-  const openAddTaskDialog = (employee: Employee, taskIndex: number | null = null) => {
-    setSelectedEmployee(employee);
+  const openAddTaskDialog = (member: Member, taskIndex: number | null = null) => {
+    setSelectedMember(member);
     setEditTaskIndex(taskIndex);
     
     if (taskIndex !== null) {
-      const task = employee.subtasks[taskIndex];
+      const task = member.subtasks[taskIndex];
       form.reset({
         name: task.name,
       });
@@ -211,18 +211,18 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     setAddTaskDialogOpen(true);
   };
 
-  const confirmDeleteTask = (employee: Employee, taskIndex: number) => {
-    setSelectedEmployee(employee);
+  const confirmDeleteTask = (member: Member, taskIndex: number) => {
+    setSelectedMember(member);
     setTaskToDeleteIndex(taskIndex);
     setAlertDialogOpen(true);
   };
 
   const deleteTask = () => {
-    if (selectedEmployee && taskToDeleteIndex !== null) {
-      setEmployees(prevEmployees => {
-        return prevEmployees.map(emp => {
-          if (emp.id === selectedEmployee.id) {
-            const updatedSubtasks = [...emp.subtasks];
+    if (selectedMember && taskToDeleteIndex !== null) {
+      setMembers(prevMembers => {
+        return prevMembers.map(mem => {
+          if (mem.id === selectedMember.id) {
+            const updatedSubtasks = [...mem.subtasks];
             updatedSubtasks.splice(taskToDeleteIndex, 1);
             
             const completedTasks = updatedSubtasks.filter(t => t.completed).length;
@@ -231,12 +231,12 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
               : 0;
             
             return {
-              ...emp,
+              ...mem,
               subtasks: updatedSubtasks,
               progress
             };
           }
-          return emp;
+          return mem;
         });
       });
       
@@ -248,11 +248,11 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
     setAlertDialogOpen(false);
   };
 
-  const toggleTaskCompletion = (employeeId: string, taskIndex: number) => {
-    setEmployees(prevEmployees => {
-      return prevEmployees.map(emp => {
-        if (emp.id === employeeId) {
-          const updatedSubtasks = [...emp.subtasks];
+  const toggleTaskCompletion = (memberId: string, taskIndex: number) => {
+    setMembers(prevMembers => {
+      return prevMembers.map(mem => {
+        if (mem.id === memberId) {
+          const updatedSubtasks = [...mem.subtasks];
           updatedSubtasks[taskIndex] = {
             ...updatedSubtasks[taskIndex],
             completed: !updatedSubtasks[taskIndex].completed
@@ -262,22 +262,22 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
           const progress = Math.round((completedTasks / updatedSubtasks.length) * 100);
           
           return {
-            ...emp,
+            ...mem,
             subtasks: updatedSubtasks,
             progress
           };
         }
-        return emp;
+        return mem;
       });
     });
   };
 
   const onSubmitTask = (values: TaskFormValues) => {
-    if (selectedEmployee) {
-      setEmployees(prevEmployees => {
-        return prevEmployees.map(emp => {
-          if (emp.id === selectedEmployee.id) {
-            let updatedSubtasks = [...emp.subtasks];
+    if (selectedMember) {
+      setMembers(prevMembers => {
+        return prevMembers.map(mem => {
+          if (mem.id === selectedMember.id) {
+            let updatedSubtasks = [...mem.subtasks];
             
             if (editTaskIndex !== null) {
               updatedSubtasks[editTaskIndex] = {
@@ -297,12 +297,12 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
             const progress = Math.round((completedTasks / updatedSubtasks.length) * 100);
             
             return {
-              ...emp,
+              ...mem,
               subtasks: updatedSubtasks,
               progress
             };
           }
-          return emp;
+          return mem;
         });
       });
       
@@ -320,8 +320,8 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4">
-        {filteredEmployees.map(employee => (
-          <Card key={employee.id} className="bg-white p-0 hover:shadow-md transition-all duration-200">
+        {filteredMembers.map(member => (
+          <Card key={member.id} className="bg-white p-0 hover:shadow-md transition-all duration-200">
             <CardContent className="p-0">
               <div className="p-5">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
@@ -330,16 +330,16 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                       <User className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-lg">{employee.name}</h3>
-                      <p className="text-sm text-gray-500">{employee.department}</p>
+                      <h3 className="font-medium text-lg">{member.name}</h3>
+                      <p className="text-sm text-gray-500">{member.department}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
                     <span className={cn("px-2 py-1 rounded-full text-xs font-medium", 
-                      getProgressColor(employee.progress)
+                      getProgressColor(member.progress)
                     )}>
-                      {employee.progress}%
+                      {member.progress}%
                     </span>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -347,11 +347,11 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                           variant="outline" 
                           size="sm" 
                           className="flex items-center gap-1 shadow-sm"
-                          onClick={() => openSubtasksDialog(employee)}
+                          onClick={() => openSubtasksDialog(member)}
                         >
                           <ListChecks size={16} />
                           <span className="ml-1">
-                            {employee.subtasks.filter(st => st.completed).length}/{employee.subtasks.length}
+                            {member.subtasks.filter(st => st.completed).length}/{member.subtasks.length}
                           </span>
                         </Button>
                       </TooltipTrigger>
@@ -365,7 +365,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                           variant="outline" 
                           size="sm" 
                           className="flex items-center gap-1 shadow-sm"
-                          onClick={() => openAddTaskDialog(employee)}
+                          onClick={() => openAddTaskDialog(member)}
                         >
                           <Plus size={16} />
                           <span className="sr-only">Add task</span>
@@ -380,12 +380,12 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                 
                 <div className="mb-3">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium">Current Task: {employee.task}</span>
+                    <span className="text-sm font-medium">Current Task: {member.task}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className={cn("rounded-full h-2", getProgressBarColor(employee.progress))} 
-                      style={{ width: `${employee.progress}%` }}
+                      className={cn("rounded-full h-2", getProgressBarColor(member.progress))} 
+                      style={{ width: `${member.progress}%` }}
                     />
                   </div>
                 </div>
@@ -399,18 +399,18 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl">
-              {selectedEmployee?.name}'s Subtasks
+              {selectedMember?.name}'s Subtasks
               <span className="ml-2 text-sm font-normal text-gray-500 capitalize">
-                ({selectedEmployee?.type.replace(/-/g, ' ')} program)
+                ({selectedMember?.type.replace(/-/g, ' ')} program)
               </span>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-[60vh] overflow-y-auto p-1">
-            {selectedEmployee?.subtasks.map((subtask, index) => (
+            {selectedMember?.subtasks.map((subtask, index) => (
               <div key={subtask.id} className="flex items-center gap-3 p-3 border rounded-md">
                 <div 
                   className="cursor-pointer"
-                  onClick={() => toggleTaskCompletion(selectedEmployee.id, index)}
+                  onClick={() => toggleTaskCompletion(selectedMember.id, index)}
                 >
                   {subtask.completed ? (
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
@@ -429,7 +429,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 w-8 p-0"
-                    onClick={() => openAddTaskDialog(selectedEmployee, index)}
+                    onClick={() => openAddTaskDialog(selectedMember, index)}
                   >
                     <Pencil size={16} className="text-gray-500" />
                     <span className="sr-only">Edit</span>
@@ -438,7 +438,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                     variant="ghost" 
                     size="sm" 
                     className="h-8 w-8 p-0"
-                    onClick={() => confirmDeleteTask(selectedEmployee, index)}
+                    onClick={() => confirmDeleteTask(selectedMember, index)}
                   >
                     <Trash2 size={16} className="text-red-500" />
                     <span className="sr-only">Delete</span>
@@ -446,7 +446,7 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
                 </div>
               </div>
             ))}
-            {selectedEmployee?.subtasks.length === 0 && (
+            {selectedMember?.subtasks.length === 0 && (
               <div className="text-center text-gray-500 py-4">No tasks assigned yet</div>
             )}
           </div>
@@ -460,8 +460,8 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
             <Button 
               onClick={() => {
                 setDialogOpen(false);
-                if (selectedEmployee) {
-                  openAddTaskDialog(selectedEmployee);
+                if (selectedMember) {
+                  openAddTaskDialog(selectedMember);
                 }
               }}
             >
@@ -530,4 +530,4 @@ const EmployeeProgress = ({ programType }: EmployeeProgressProps) => {
   );
 };
 
-export default EmployeeProgress;
+export default MemberProgress;

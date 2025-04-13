@@ -2,15 +2,15 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EmployeeProgress from "@/components/dashboard/EmployeeProgress";
+import MemberProgress from "@/components/dashboard/EmployeeProgress";
 
-const EmployeeProgressPage = () => {
+const MemberProgressPage = () => {
   const [activeTab, setActiveTab] = useState("90-day");
 
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        <h1 className="text-3xl font-light">Employee Progress</h1>
+        <h1 className="text-3xl font-light">Member Progress</h1>
         
         <Tabs defaultValue="90-day" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 mb-4">
@@ -20,15 +20,15 @@ const EmployeeProgressPage = () => {
           </TabsList>
           
           <TabsContent value="90-day" className="animate-in fade-in-50">
-            <EmployeeProgress programType="90-day" />
+            <MemberProgress programType="90-day" />
           </TabsContent>
           
           <TabsContent value="graduation" className="animate-in fade-in-50">
-            <EmployeeProgress programType="graduation" />
+            <MemberProgress programType="graduation" />
           </TabsContent>
           
           <TabsContent value="before-kitchen-use" className="animate-in fade-in-50">
-            <EmployeeProgress programType="before-kitchen-use" />
+            <MemberProgress programType="before-kitchen-use" />
           </TabsContent>
         </Tabs>
       </div>
@@ -36,4 +36,4 @@ const EmployeeProgressPage = () => {
   );
 };
 
-export default EmployeeProgressPage;
+export default MemberProgressPage;
