@@ -1,5 +1,4 @@
-
-import { Calendar, Users, FileText, Home, DollarSign, Award } from 'lucide-react';
+import { Users, FileText, Home, DollarSign, Award } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -23,11 +22,6 @@ const DashboardSidebar = () => {
       title: "Dashboard",
       icon: Home,
       path: "/",
-    },
-    {
-      title: "Calendar",
-      icon: Calendar,
-      path: "/calendar",
     },
     {
       title: "Member Progress",
